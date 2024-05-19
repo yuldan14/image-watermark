@@ -14,10 +14,18 @@
     </nav>
     <div class="container">
         <div class="input">
-            <input type="file" id="original-image-input" accept="image/*">
-            <input type="file" id="watermark-image-input" accept="image/*">
-            <label for="alpha-scale">Watermark Scale</label>
-            <input type="range" id="alpha-scale" min="0" max="1" step="0.01" value="0.1">
+            <div class="ori">
+                <label for="original">Foto Original</label>
+                <input type="file" id="original-image-input" accept="image/*">
+            </div>
+            <div class="watermark">
+                <label for="watermark">Watermark</label>
+                <input type="file" id="watermark-image-input" accept="image/*">
+            </div>
+            <div class="watermark">
+                <label for="alpha-scale">Watermark Scale</label>
+                <input type="range" id="alpha-scale" min="0" max="1" step="0.01" value="0.1">
+            </div>
             <button id="apply-watermark-btn">Apply Watermark</button>
         </div>
         <div class="image-container">

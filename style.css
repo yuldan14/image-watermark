@@ -25,6 +25,10 @@ nav{
     cursor: pointer;
 
 }
+.ori, .watermark{
+    display: flex;
+    flex-direction: column;
+}
 
 .image-container{
     justify-content: center;
