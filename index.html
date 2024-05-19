@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watermark Image </title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav>
+        <h1>Watermark Image</h1>
+    </nav>
+    <div class="container">
+        <div class="input">
+            <input type="file" id="original-image-input" accept="image/*">
+            <input type="file" id="watermark-image-input" accept="image/*">
+            <label for="alpha-scale">Watermark Scale</label>
+            <input type="range" id="alpha-scale" min="0" max="1" step="0.01" value="0.1">
+            <button id="apply-watermark-btn">Apply Watermark</button>
+        </div>
+        <div class="image-container">
+            <h2>Original Image</h2>
+            <canvas id="original-image-canvas"></canvas>
+        </div>
+        <div class="image-container">
+            <h2>Watermarked Image</h2>
+            <canvas id="watermarked-image-canvas"></canvas>
+        </div>
+    </div>
+
+    <footer>
+        &copy Yuldan Nur Addinsyah | Agus Budi H | Muhammad Faiq
+    </footer>
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('original-image-input').addEventListener('change', handleOriginalImage);
+        document.getElementById('watermark-image-input').addEventListener('change', handleWatermarkImage);
+        document.getElementById('apply-watermark-btn').addEventListener('click', applyWatermark);
+
+        let originalImage, watermarkImage;
+
+        function handleOriginalImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.onload = function () {
+                        originalImage = img;
+                        drawImageOnCanvas(img, 'original-image-canvas');
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleWatermarkImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.onload = function () {
+                        watermarkImage = img;
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function drawImageOnCanvas(image, canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            ctx.drawImage(image, 0, 0);
+        }
+
+        function applyWatermark() {
+            if (!originalImage || !watermarkImage) {
+                alert('Please select both original and watermark images');
+                return;
+            }
+
+            const alpha = parseFloat(document.getElementById('alpha-scale').value);
+
+            const originalCanvas = document.createElement('canvas');
+            const watermarkCanvas = document.createElement('canvas');
+
+            originalCanvas.width = originalImage.width;
+            originalCanvas.height = originalImage.height;
+            watermarkCanvas.width = originalImage.width;
+            watermarkCanvas.height = originalImage.height;
+
+            const originalCtx = originalCanvas.getContext('2d');
+            const watermarkCtx = watermarkCanvas.getContext('2d');
+
+            originalCtx.drawImage(originalImage, 0, 0, originalImage.width, originalImage.height);
+            watermarkCtx.drawImage(watermarkImage, 0, 0, originalImage.width, originalImage.height);
+
+            const originalImageData = originalCtx.getImageData(0, 0, originalImage.width, originalImage.height);
+            const watermarkImageData = watermarkCtx.getImageData(0, 0, originalImage.width, originalImage.height);
+
+            const originalPixels = originalImageData.data;
+            const watermarkPixels = watermarkImageData.data;
+
+            for (let i = 0; i < originalPixels.length; i += 4) {
+                // Apply watermark to each color channel
+                originalPixels[i] = blendPixels(originalPixels[i], watermarkPixels[i], alpha);     // Red channel
+                originalPixels[i + 1] = blendPixels(originalPixels[i + 1], watermarkPixels[i + 1], alpha); // Green channel
+                originalPixels[i + 2] = blendPixels(originalPixels[i + 2], watermarkPixels[i + 2], alpha); // Blue channel
+                // Alpha channel remains unchanged
+            }
+
+            originalCtx.putImageData(originalImageData, 0, 0);
+            drawImageOnCanvas(originalCanvas, 'watermarked-image-canvas');
+        }
+
+        function blendPixels(original, watermark, alpha) {
+            return Math.round((1 - alpha) * original + alpha * watermark);
+        }
+
+    </script>
+</body>
+
+</html>
